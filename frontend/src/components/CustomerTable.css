@@ -1,0 +1,33 @@
+/* Focus on legibility and table UX */
+.table-wrapper {
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.03);
+  background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));
+  padding: 8px;
+}
+
+/* responsive horizontal scroll shadow hint */
+.table-wrapper:before {
+  content: "";
+  display:block;
+  height:8px;
+  width:100%;
+  box-shadow: inset 10px 0 10px -10px rgba(0,0,0,0.6);
+  pointer-events:none;
+}
+
+/* nicer rows */
+tbody tr { transition: background 160ms ease, transform 120ms ease; }
+tbody tr:hover { background: rgba(255,255,255,0.02); transform: translateZ(0); }
+
+/* sticky headers handled in App.css, small improvements: */
+th { letter-spacing: 0.2px; }
+
+/* make long numbers wrap gracefully */
+td { white-space: nowrap; text-overflow: ellipsis; overflow: hidden; max-width: 160px; }
+
+/* small helper class for numeric values */
+td.num { font-variant-numeric: tabular-nums; font-weight:600; color:#fff; }
+
+/* pagination buttons alignment */
+.pagination { justify-content: flex-end; align-items:center; gap:8px; display:flex; margin-top:12px; }

@@ -1,0 +1,13 @@
+.top-products-wrapper { display:flex; flex-direction:column; gap:10px; }
+.top-products-card {
+  display:flex; flex-direction:column; gap:6px;
+  border-radius:10px; padding:12px; min-height:120px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.008), transparent);
+  border: 1px solid rgba(255,255,255,0.03);
+}
+.top-products-card h4 { font-size:14px; margin:0 0 4px 0; }
+.top-products-card ol { margin:0; padding-left:18px; color:var(--muted); }
+.top-products-card li { margin-bottom:8px; display:flex; flex-direction:column; gap:4px; }
+
+/* product metadata */
+.prod-meta { font-size:12px; color:var(--muted-2); }

@@ -1,0 +1,12 @@
+/* Empty file allowed — KPI styles exist in App.css
+   But put a small enhancement for chip badges here. */
+
+.kpi-card .kpi-badge {
+  display:inline-flex;
+  align-items:center;
+  padding:6px 8px;
+  border-radius:999px;
+  background: rgba(255,255,255,0.02);
+  font-size:12px;
+  color: var(--muted);
+}
