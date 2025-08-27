@@ -24,6 +24,7 @@ import ColumnMapping from "./components/ColumnMapping";
 import KPIs from "./components/KPIs";
 import SegmentCharts from "./components/SegmentCharts";
 import TopProducts from "./components/TopProducts";
+import ProductAnalysis from "./components/ProductAnalysis";
 import CustomerTable from "./components/CustomerTable";
 import CustomVisualization from "./components/CustomVisualization";
 import "./App.css";
@@ -366,6 +367,9 @@ export default function App() {
                         <TopProducts topProducts={data.analytics.top_products_per_segment} />
                       )}
                     </div>
+
+                    {/* Product Analysis - Most Expensive & Most Bought */}
+                    <ProductAnalysis analytics={data.analytics} />
                   </>
                 )}
 

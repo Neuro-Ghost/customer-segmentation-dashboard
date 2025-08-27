@@ -341,14 +341,7 @@ def auto_name_segments(rfm_scaled_means: pd.DataFrame) -> Dict[int, str]:
     Returns:
         Dict mapping cluster numbers to segment names
     """
-    logger.info("🏷️ Auto-assigning segment names based on RFM characteristics...")
     cluster_names = {}
-    
-    # Log the scaled means for debugging
-    logger.info("Cluster characteristics (scaled values):")
-    for _, row in rfm_scaled_means.iterrows():
-        cluster = int(row['Cluster'])
-        logger.info(f"  Cluster {cluster}: R={row['Recency']:.3f}, F={row['Frequency']:.3f}, M={row['Monetary']:.3f}")
     
     for _, row in rfm_scaled_means.iterrows():
         cluster = int(row['Cluster'])
@@ -357,59 +350,40 @@ def auto_name_segments(rfm_scaled_means: pd.DataFrame) -> Dict[int, str]:
         monetary = row['Monetary']
         
         # Determine segment characteristics
-        # Recency: Lower is better (recently purchased) - negative scaled values are good
-        # Frequency: Higher is better (frequent purchases) - positive scaled values are good
-        # Monetary: Higher is better (high spending) - positive scaled values are good
+        # Recency: Lower is better (recently purchased)
+        # Frequency: Higher is better (frequent purchases)  
+        # Monetary: Higher is better (high spending)
         
-        recent = recency < 0  # Below average recency (good - recently active)
-        frequent = frequency > 0  # Above average frequency (good - frequent buyers)
-        high_value = monetary > 0  # Above average monetary (good - high spenders)
+        recent = recency < 0  # Below average recency (good)
+        frequent = frequency > 0  # Above average frequency (good)
+        high_value = monetary > 0  # Above average monetary (good)
         
-        # Create detailed profile for naming
-        recency_level = "Recent" if recent else "Distant"
-        frequency_level = "Frequent" if frequent else "Infrequent" 
-        monetary_level = "High-Value" if high_value else "Low-Value"
-        
-        # Assign names based on RFM profile following established segmentation logic
+        # Assign names based on RFM profile following notebook analysis
         if recent and frequent and high_value:
             # Best customers: recent, frequent, high spending
-            name = "Champions"
-            description = "Recent high-value frequent buyers"
+            cluster_names[cluster] = "Champions"
         elif recent and frequent and not high_value:
             # Good customers but lower spending
-            name = "Loyal Customers"
-            description = "Recent frequent buyers with moderate spending"
+            cluster_names[cluster] = "Loyal Customers"
         elif recent and not frequent and high_value:
             # High spenders but infrequent
-            name = "Big Spenders"
-            description = "Recent high-value but infrequent buyers"
+            cluster_names[cluster] = "Big Spenders"
         elif recent and not frequent and not high_value:
             # Recent but low activity
-            name = "New Customers"
-            description = "Recent but low-frequency and low-value"
+            cluster_names[cluster] = "New Customers"
         elif not recent and frequent and high_value:
             # Used to be good, need attention
-            name = "At-Risk VIPs"
-            description = "Previously frequent high-value customers who haven't been back recently"
+            cluster_names[cluster] = "At-Risk VIPs"
         elif not recent and frequent and not high_value:
             # Frequent but haven't been back recently
-            name = "Cannot Lose Them"
-            description = "Previously frequent customers who need re-engagement"
+            cluster_names[cluster] = "Cannot Lose Them"
         elif not recent and not frequent and high_value:
             # Big spenders who haven't been back
-            name = "Hibernating VIPs"
-            description = "Previously high-value customers who are dormant"
+            cluster_names[cluster] = "Hibernating VIPs"
         else:
             # Low on all metrics
-            name = "Lost Customers"
-            description = "Low engagement across all RFM dimensions"
-        
-        cluster_names[cluster] = name
-        
-        logger.info(f"  → Cluster {cluster}: '{name}' ({recency_level}, {frequency_level}, {monetary_level})")
-        logger.info(f"    Profile: {description}")
+            cluster_names[cluster] = "Lost Customers"
     
-    logger.info(f"✅ Assigned names to {len(cluster_names)} segments")
     return cluster_names
 
 def scale_and_cluster(rfm: pd.DataFrame, business_name: str, retrain: bool = False) -> Tuple[pd.DataFrame, np.ndarray, float, float]:
@@ -517,18 +491,13 @@ def scale_and_cluster(rfm: pd.DataFrame, business_name: str, retrain: bool = Fal
         # Apply segment names
         rfm['Cluster_Name'] = rfm['Cluster'].map(cluster_name_mapping)
         
-        # Add both numerical and named segments to ensure compatibility
-        rfm['Segment'] = rfm['Cluster_Name']  # For frontend compatibility
-        
         # Log the cluster characteristics for verification
-        logger.info("Final cluster assignments:")
+        logger.info("Cluster characteristics (scaled means):")
         for _, row in cluster_means.iterrows():
             cluster = int(row['Cluster'])
             segment_name = cluster_name_mapping.get(cluster, f"Cluster {cluster}")
-            count = (rfm['Cluster'] == cluster).sum()
-            percentage = (count / len(rfm)) * 100
-            logger.info(f"  Cluster {cluster} → '{segment_name}': {count} customers ({percentage:.1f}%)")
-            logger.info(f"    RFM Profile: R={row['Recency']:.3f}, F={row['Frequency']:.3f}, M={row['Monetary']:.3f}")
+            logger.info(f"  {segment_name}: R={row['Recency']:.3f}, F={row['Frequency']:.3f}, M={row['Monetary']:.3f}")
+        
         
         logger.info("Cluster distribution:")
         for cluster_id, cluster_name in cluster_name_mapping.items():
@@ -538,7 +507,7 @@ def scale_and_cluster(rfm: pd.DataFrame, business_name: str, retrain: bool = Fal
         
         # Generate comprehensive analytics
         logger.info("Generating analytics...")
-        analytics = generate_analytics(rfm, rfm_scaled_array, silhouette_avg, inertia, cluster_name_mapping)
+        analytics = generate_analytics(rfm, rfm_scaled_array, silhouette_avg, inertia)
         
         return rfm, analytics
         
@@ -547,8 +516,7 @@ def scale_and_cluster(rfm: pd.DataFrame, business_name: str, retrain: bool = Fal
         raise
 
 def generate_analytics(rfm: pd.DataFrame, scaled_features: np.ndarray, 
-                      silhouette_score: float, inertia: float, 
-                      cluster_mapping: Dict[int, str]) -> Dict[str, Any]:
+                      silhouette_score: float, inertia: float) -> Dict[str, Any]:
     """
     Generate comprehensive analytics for the dashboard.
     
@@ -557,7 +525,6 @@ def generate_analytics(rfm: pd.DataFrame, scaled_features: np.ndarray,
         scaled_features (np.ndarray): Scaled feature array
         silhouette_score (float): Model silhouette score
         inertia (float): Model inertia
-        cluster_mapping (Dict[int, str]): Mapping of cluster numbers to names
         
     Returns:
         Dict[str, Any]: Comprehensive analytics dictionary
@@ -565,30 +532,11 @@ def generate_analytics(rfm: pd.DataFrame, scaled_features: np.ndarray,
     try:
         logger.info("Generating comprehensive analytics...")
         
-        # Create segment summary for detailed analysis
-        segment_summary = []
-        for segment in rfm['Cluster_Name'].unique():
-            segment_data = rfm[rfm['Cluster_Name'] == segment]
-            summary = {
-                "Segment": segment,
-                "Count": len(segment_data),
-                "Percentage": round((len(segment_data) / len(rfm)) * 100, 1),
-                "Recency": round(segment_data['Recency'].mean(), 2),
-                "Frequency": round(segment_data['Frequency'].mean(), 2), 
-                "Monetary": round(segment_data['Monetary'].mean(), 2),
-                "Total_Revenue": round(segment_data['Monetary'].sum(), 2)
-            }
-            segment_summary.append(summary)
-            logger.info(f"  {segment}: {summary['Count']} customers ({summary['Percentage']}%), "
-                       f"Avg R={summary['Recency']}, F={summary['Frequency']}, M=${summary['Monetary']}")
-        
         analytics = {
             "n_customers": len(rfm),
-            "n_rows": len(rfm),  # For backward compatibility
             "cluster_counts": rfm['Cluster_Name'].value_counts().to_dict(),
             "revenue_by_segment": rfm.groupby('Cluster_Name')['Monetary'].sum().to_dict(),
-            "avg_rfm": segment_summary,  # Enhanced format for frontend
-            "segment_mapping": cluster_mapping,  # Include the cluster number -> name mapping
+            "avg_rfm": rfm.groupby('Cluster_Name')[['Recency', 'Frequency', 'Monetary']].mean().round(2).to_dict(),
             "model_performance": {
                 "silhouette_score": float(silhouette_score),
                 "inertia": float(inertia),
@@ -597,7 +545,7 @@ def generate_analytics(rfm: pd.DataFrame, scaled_features: np.ndarray,
             "segment_profiles": {}
         }
         
-        # Detailed segment profiles (legacy format for compatibility)
+        # Detailed segment profiles
         for segment in rfm['Cluster_Name'].unique():
             segment_data = rfm[rfm['Cluster_Name'] == segment]
             analytics["segment_profiles"][segment] = {
@@ -709,6 +657,33 @@ def process_full_pipeline(df: pd.DataFrame, column_mappings: Dict[str, str],
         logger.info("STEP 4: Product Analysis")
         top_products = get_top_products_by_segment(df_clean, rfm_with_clusters)
         analytics["top_products_per_segment"] = top_products
+        
+        # Step 4b: Overall product analysis (Most Expensive & Most Bought)
+        logger.info("STEP 4b: Overall Product Analysis")
+        
+        # Most expensive products
+        most_expensive = df_clean.groupby('Description')['UnitPrice'].max().sort_values(ascending=False).head(10)
+        analytics["most_expensive_products"] = [
+            {
+                "Description": desc,
+                "UnitPrice": float(price)
+            }
+            for desc, price in most_expensive.items()
+        ]
+        
+        # Most bought products (by total quantity)
+        most_bought = df_clean.groupby('Description')['Quantity'].sum().sort_values(ascending=False).head(10)
+        analytics["most_bought_products"] = [
+            {
+                "Description": desc,
+                "TotalQuantity": int(qty)
+            }
+            for desc, qty in most_bought.items()
+        ]
+        
+        logger.info(f"Added {len(analytics['most_expensive_products'])} most expensive products")
+        logger.info(f"Added {len(analytics['most_bought_products'])} most bought products")
+        
         analytics["n_rows"] = len(df_clean)
         
         logger.info("="*60)
