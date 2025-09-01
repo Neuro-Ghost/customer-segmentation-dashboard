@@ -1,4 +1,17 @@
 # 🏷 Customer Segmentation Dashboard
-**Advanced RFM Analysis Dashboard** with intelligent column mapping, business-specific model training, and interactive visualizations.  
-Clone the repository: `git clone https://github.com/Neuro-Ghost/customer-segmentation-dashboard.git && cd customer-segmentation-dashboard`  
-Backend setup: `python -m venv venv` then activate (`.\venv\Scripts\activate` on Windows, `source venv/bin/activate` on macOS/Linux) and install dependencies `pip install -r requirements.txt`. Add CORS middleware in `app/main.py` if frontend runs on a different port: `from fastapi.middleware.cors import CORSMiddleware; app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])`. Run backend: `uvicorn app.main:app --reload` (backend runs at http://127.0.0.1:8000). Frontend setup: `cd frontend` then `npm install`. Update backend URL in `App.jsx`: `const API_BASE_URL = "http://127.0.0.1:8000"`. Run frontend: `npm run dev` (frontend runs at http://localhost:5173). Test with sample data: upload `test_data.csv`, map columns, and view segmentation results. Requirements: Python 3.9+, Node.js 18+, npm. Notes: Ensure CORS is enabled, update `API_BASE_URL` if needed, sample database `business_models.db` included. Support: Open a GitHub issue for questions, bug reports, or feature requests.
+![Python](https://img.shields.io/badge/Python-3.9%2B-blue) ![Node.js](https://img.shields.io/badge/Node.js-18%2B-green) ![License](https://img.shields.io/badge/License-MIT-yellow)
+
+**Advanced Customer Segmentation Dashboard** with intelligent column mapping, RFM analysis, business-specific model training, and interactive visualizations.
+
+## Features
+- Multi-step workflow: Upload → Column Mapping → Results  
+- Automatic column detection and mapping suggestions  
+- Business-specific model training and clustering  
+- Interactive visualizations of customer segments  
+- Downloadable insights and top products analysis  
+
+## Quick Start
+**Clone the repository:**  
+```bash
+git clone https://github.com/Neuro-Ghost/customer-segmentation-dashboard.git
+cd customer-segmentation-dashboard
