@@ -17,12 +17,15 @@ git clone https://github.com/Neuro-Ghost/customer-segmentation-dashboard.git
 cd customer-segmentation-dashboard
 ```
 ## Backend Setup (Python/FastAPI):
+ Windows PowerShell
 
 ```
 python -m venv venv
-# Windows PowerShell
 .\venv\Scripts\activate
-# macOS/Linux
+```
+
+ macOS/Linux
+```
 source venv/bin/activate
 pip install -r requirements.txt
 ```
